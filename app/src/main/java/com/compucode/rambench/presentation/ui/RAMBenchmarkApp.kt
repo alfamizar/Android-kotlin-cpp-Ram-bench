@@ -24,7 +24,7 @@ fun RAMBenchmarkApp(viewModel: BenchmarkViewModel) {
     }
 
     val scrollState = remember { ScrollState(0) }
-    val isEnabled = !viewModel.isRunning // Disable UI when running
+    val isEnabled = !viewModel.isRunning // Disable UI when running tests
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -46,7 +46,7 @@ fun RAMBenchmarkApp(viewModel: BenchmarkViewModel) {
                     Text("Implementation: ")
                     Button(
                         onClick = { expandedImpl = true },
-                        enabled = isEnabled // Disable when running
+                        enabled = isEnabled
                     ) {
                         Text(if (viewModel.useNative) "Native" else "Kotlin")
                     }
@@ -61,7 +61,7 @@ fun RAMBenchmarkApp(viewModel: BenchmarkViewModel) {
                                 if (viewModel.selectedSize > 2048) viewModel.selectedSize = 256
                                 expandedImpl = false
                             },
-                            enabled = isEnabled // Disable when running
+                            enabled = isEnabled
                         )
                         DropdownMenuItem(
                             text = { Text("Kotlin") },
@@ -70,7 +70,7 @@ fun RAMBenchmarkApp(viewModel: BenchmarkViewModel) {
                                 if (viewModel.selectedSize > 128) viewModel.selectedSize = 128
                                 expandedImpl = false
                             },
-                            enabled = isEnabled // Disable when running
+                            enabled = isEnabled
                         )
                     }
                 }
@@ -82,7 +82,7 @@ fun RAMBenchmarkApp(viewModel: BenchmarkViewModel) {
                     Text("Size (MB): ")
                     Button(
                         onClick = { expandedSize = true },
-                        enabled = isEnabled // Disable when running
+                        enabled = isEnabled
                     ) {
                         Text("${viewModel.selectedSize}")
                     }
@@ -94,7 +94,7 @@ fun RAMBenchmarkApp(viewModel: BenchmarkViewModel) {
                             DropdownMenuItem(
                                 text = { Text("$size") },
                                 onClick = { viewModel.selectedSize = size; expandedSize = false },
-                                enabled = isEnabled // Disable when running
+                                enabled = isEnabled
                             )
                         }
                     }
@@ -109,7 +109,7 @@ fun RAMBenchmarkApp(viewModel: BenchmarkViewModel) {
                         onValueChange = { viewModel.iterations = it.toInt() },
                         valueRange = 1f..10f,
                         steps = 8,
-                        enabled = isEnabled // Disable when running
+                        enabled = isEnabled
                     )
                 }
 
@@ -119,7 +119,7 @@ fun RAMBenchmarkApp(viewModel: BenchmarkViewModel) {
                     Checkbox(
                         checked = viewModel.keepScreenOn,
                         onCheckedChange = { viewModel.keepScreenOn = it },
-                        enabled = isEnabled // Disable when running
+                        enabled = isEnabled
                     )
                     Text("Keep Screen On")
                 }
@@ -132,13 +132,13 @@ fun RAMBenchmarkApp(viewModel: BenchmarkViewModel) {
                 ) {
                     Button(
                         onClick = { viewModel.startBenchmark() },
-                        enabled = isEnabled // Already handled, kept for clarity
+                        enabled = isEnabled
                     ) {
                         Text("Start")
                     }
                     Button(
                         onClick = { viewModel.cancelBenchmark() },
-                        enabled = viewModel.isRunning // Cancel stays enabled
+                        enabled = viewModel.isRunning
                     ) {
                         Text("Cancel")
                     }
@@ -149,7 +149,7 @@ fun RAMBenchmarkApp(viewModel: BenchmarkViewModel) {
                 if (viewModel.isRunning) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         LinearProgressIndicator(
-                            progress = viewModel.progress,
+                            progress = { viewModel.progress },
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(Modifier.height(8.dp))

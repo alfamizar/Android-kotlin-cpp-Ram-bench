@@ -1,14 +1,11 @@
 package com.compucode.rambench.domain
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.nio.ByteBuffer
-import java.util.concurrent.Executors
 import kotlin.system.measureNanoTime
 
 class BenchmarkService {
-    private val benchmarkDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
 
     private external fun benchmarkRead(size: Int): Double
     private external fun benchmarkWrite(size: Int): Double
@@ -21,10 +18,8 @@ class BenchmarkService {
         onProgress: (BenchmarkType, Int) -> Unit
     ): Triple<Double, Double, Double> = withContext(Dispatchers.Default) {
         val sizeBytes = sizeMb * 1024 * 1024
-        val totalSteps = iterations * 3
         var currentStep = 0
 
-        // Run all read iterations
         var readTotal = 0.0
         repeat(iterations) { i ->
             onProgress(BenchmarkType.READ, i)
@@ -33,7 +28,6 @@ class BenchmarkService {
             onProgress(BenchmarkType.READ, i) // Update progress after each iteration
         }
 
-        // Run all write iterations
         var writeTotal = 0.0
         repeat(iterations) { i ->
             onProgress(BenchmarkType.WRITE, i)
@@ -42,7 +36,6 @@ class BenchmarkService {
             onProgress(BenchmarkType.WRITE, i)
         }
 
-        // Run all copy iterations
         var copyTotal = 0.0
         repeat(iterations) { i ->
             onProgress(BenchmarkType.COPY, i)

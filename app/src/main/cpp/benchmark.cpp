@@ -5,9 +5,6 @@
 #include <android/log.h>
 #include <arm_neon.h>
 
-#define LOG_TAG "RAMBench"
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-
 double calculateThroughput(size_t size, double elapsed) {
     return (size / (1024.0 * 1024.0)) / elapsed;
 }
@@ -24,7 +21,7 @@ Java_com_compucode_rambench_domain_BenchmarkService_benchmarkRead(JNIEnv* env, j
         // Warm-up phase
         int64x2_t sum_vec_warmup = {0, 0};
         int size_vec = size / 16; // 16-byte chunks
-        int64x2_t* buffer_vec = reinterpret_cast<int64x2_t*>(buffer);
+        auto* buffer_vec = reinterpret_cast<int64x2_t*>(buffer);
         for (int i = 0; i < size_vec; i++) {
             sum_vec_warmup = vaddq_s64(sum_vec_warmup, buffer_vec[i]);
         }
@@ -43,7 +40,7 @@ Java_com_compucode_rambench_domain_BenchmarkService_benchmarkRead(JNIEnv* env, j
         std::chrono::duration<double> elapsed = end - start;
         return calculateThroughput(size, elapsed.count());
     } catch (const std::bad_alloc& e) {
-        if (buffer) delete[] buffer;
+        delete[] buffer;
         return -1.0;
     }
 }
@@ -57,7 +54,7 @@ Java_com_compucode_rambench_domain_BenchmarkService_benchmarkWrite(JNIEnv* env, 
         // Warm-up phase
         int64x2_t value_vec = {0x0101010101010101, 0x0101010101010101}; // Pattern: repeating 1s
         int size_vec = size / 16; // 16-byte chunks
-        int64_t* buffer_vec = reinterpret_cast<int64_t*>(buffer);
+        auto* buffer_vec = reinterpret_cast<int64_t*>(buffer);
         for (int i = 0; i < size_vec; i++) {
             vst1q_s64(buffer_vec + (i * 2), value_vec);
         }
@@ -88,7 +85,7 @@ Java_com_compucode_rambench_domain_BenchmarkService_benchmarkWrite(JNIEnv* env, 
         std::chrono::duration<double> elapsed = end - start;
         return calculateThroughput(size, elapsed.count());
     } catch (const std::bad_alloc& e) {
-        if (buffer) delete[] buffer;
+        delete[] buffer;
         return -1.0;
     }
 }
@@ -104,8 +101,8 @@ Java_com_compucode_rambench_domain_BenchmarkService_benchmarkCopy(JNIEnv* env, j
 
         // Warm-up phase
         int size_vec = size / 16; // 16-byte chunks
-        int64_t* src_vec = reinterpret_cast<int64_t*>(src);
-        int64_t* dst_vec = reinterpret_cast<int64_t*>(dst);
+        auto* src_vec = reinterpret_cast<int64_t*>(src);
+        auto* dst_vec = reinterpret_cast<int64_t*>(dst);
         for (int i = 0; i < size_vec; i++) {
             int64x2_t data = vld1q_s64(&src_vec[i * 2]);
             vst1q_s64(&dst_vec[i * 2], data);
@@ -135,8 +132,8 @@ Java_com_compucode_rambench_domain_BenchmarkService_benchmarkCopy(JNIEnv* env, j
         std::chrono::duration<double> elapsed = end - start;
         return calculateThroughput(size, elapsed.count());
     } catch (const std::bad_alloc& e) {
-        if (src) delete[] src;
-        if (dst) delete[] dst;
+        delete[] src;
+        delete[] dst;
         return -1.0;
     }
 }
