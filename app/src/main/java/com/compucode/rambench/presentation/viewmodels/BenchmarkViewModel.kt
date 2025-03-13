@@ -94,7 +94,7 @@ class BenchmarkViewModel @Inject constructor(
     }
 
     fun getAvailableSizes(): List<Int> = if (useNative) {
-        listOf(64, 128, 256, 512, 1024, 2048)
+        listOf(64, 128, 256, 512, 1024)
     } else {
         listOf(64, 128)
     }
